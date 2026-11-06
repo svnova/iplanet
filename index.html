@@ -517,6 +517,7 @@
       const creativityMatch = creativity.match(/\d+/);
       const creativityScore = creativityMatch ? parseInt(creativityMatch[0], 10) : 0;
       const isSubversive = creativityScore >= 6;
+      const random = getRandomInt(1, 10);
 
       const appContainer = document.getElementById('app');
       if (isSubversive) {
@@ -537,7 +538,7 @@
         <div class="surveillance-photo-frame">
           <div class="reticle-top">REC ● [TARGET LOCK: ${idNum !== '---' ? idNum : 'SUBJECT'}]</div>
           <img src="${imageUrl !== '---' ? imageUrl : DEFAULT_AVATAR}" alt="${identity}" onerror="this.src='${DEFAULT_AVATAR}'">
-          <div class="reticle-bottom">OPTIC // CAM_FEED_${getRandomInt(1, 10)</div>
+          <div class="reticle-bottom">OPTIC // CAM_FEED_${random}</div>
         </div>
 
         <div class="unit-meta">
