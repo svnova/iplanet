@@ -490,6 +490,10 @@
         return '---';
       };
 
+      function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
       const idNum = getVal(['id_number', 'idnumber', 'id']);
       const identity = getVal(['identity', 'name', 'unit']);
       const rawDate = getVal(['date_of_production', 'production_date', 'date', 'dob', 'date_of_birth']);
@@ -533,7 +537,7 @@
         <div class="surveillance-photo-frame">
           <div class="reticle-top">REC ● [TARGET LOCK: ${idNum !== '---' ? idNum : 'SUBJECT'}]</div>
           <img src="${imageUrl !== '---' ? imageUrl : DEFAULT_AVATAR}" alt="${identity}" onerror="this.src='${DEFAULT_AVATAR}'">
-          <div class="reticle-bottom">OPTIC // CAM_FEED_07</div>
+          <div class="reticle-bottom">OPTIC // CAM_FEED_{getRandomInt(1, 10)</div>
         </div>
 
         <div class="unit-meta">
