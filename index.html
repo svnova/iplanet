@@ -75,6 +75,113 @@
       z-index: 0;
     }
 
+    /* -------------------------------------------------------------
+       CONCEPT 1: CINEMATIC BOOT SCREEN OVERLAY
+    ------------------------------------------------------------- */
+    #boot-screen {
+      position: fixed;
+      inset: 0;
+      background-color: #040507;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 20px;
+      transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.7s;
+    }
+
+    #boot-screen.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .boot-content {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      max-width: 360px;
+    }
+
+    .boot-logo-wrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .boot-logo {
+      width: 130px;
+      max-width: 65vw;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 0 16px rgba(0, 255, 204, 0.45));
+      animation: logoPulse 2.2s infinite ease-in-out;
+    }
+
+    @keyframes logoPulse {
+      0%, 100% {
+        transform: scale(0.96);
+        opacity: 0.65;
+        filter: drop-shadow(0 0 10px rgba(0, 255, 204, 0.25));
+      }
+      50% {
+        transform: scale(1.03);
+        opacity: 1;
+        filter: drop-shadow(0 0 28px rgba(0, 255, 204, 0.85));
+      }
+    }
+
+    .boot-title {
+      font-family: 'Chakra Petch', sans-serif;
+      color: var(--cyan);
+      font-size: 0.95rem;
+      letter-spacing: 2.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .boot-status {
+      font-family: 'Space Grotesk', monospace;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      letter-spacing: 1.2px;
+      min-height: 1.2em;
+      text-transform: uppercase;
+    }
+
+    .boot-progress-bar {
+      width: 140px;
+      height: 2px;
+      background: rgba(0, 255, 204, 0.15);
+      position: relative;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .boot-progress-bar::after {
+      content: "";
+      position: absolute;
+      left: -50%;
+      width: 50%;
+      height: 100%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      animation: sweepBar 1.4s infinite ease-in-out;
+    }
+
+    @keyframes sweepBar {
+      0% { left: -50%; width: 25%; }
+      50% { width: 60%; }
+      100% { left: 100%; width: 25%; }
+    }
+
+    /* -------------------------------------------------------------
+       DOSSIER INTERFACE STYLING
+    ------------------------------------------------------------- */
     .dossier-card {
       position: relative;
       z-index: 1;
@@ -420,6 +527,23 @@
 </head>
 <body>
 
+  <!-- Fullscreen Cinematic Boot Sequence -->
+  <div id="boot-screen">
+    <div class="boot-content">
+      <div class="boot-logo-wrapper">
+        <img 
+          src="https://svnova.github.io/iplanet/iPlanetLogo.png" 
+          alt="iPlanet Ministry Seal" 
+          class="boot-logo"
+          onerror="this.style.display='none'"
+        >
+      </div>
+      <div class="boot-title">IPLANET MINISTRY</div>
+      <div class="boot-status" id="boot-status">INITIALIZING HANDSHAKE...</div>
+      <div class="boot-progress-bar"></div>
+    </div>
+  </div>
+
   <div class="bg-grid"></div>
 
   <div class="dossier-card" id="app">
@@ -431,15 +555,49 @@
 
   <script>
     // -------------------------------------------------------------
-    // PASTE YOUR PUBLISHED GOOGLE SHEET CSV URL HERE:
+    // PUBLISHED GOOGLE SHEET CSV URL
     // -------------------------------------------------------------
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRlmhjhIPa6cbXQecsfKAlLoLilr1NAV2QGqepe_rf9_E3CTB-T-Jlpd1rge93AsT-2CtXoh5spt3qY/pub?output=csv";
 
     // 10-star rating scale
     const MAX_STARS = 10;
 
+    // Minimum display time for boot animation (in milliseconds)
+    const MIN_BOOT_DURATION = 1500;
+    const pageStartTime = Date.now();
+
     // SVG placeholder if image link is blank, corrupted, or 404s
     const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='300' fill='%2308090c'%3E%3Crect width='100%25' height='100%25' fill='%2308090c'/%3E%3Cline x1='0' y1='0' x2='500' y2='300' stroke='%23161b22' stroke-width='1.5'/%3E%3Cline x1='0' y1='300' x2='500' y2='0' stroke='%23161b22' stroke-width='1.5'/%3E%3Ctext x='50%25' y='46%25' fill='%2300ffcc' font-family='monospace' font-size='14' letter-spacing='2' text-anchor='middle'%3E%5B SUBJECT VISUAL UNAVAILABLE %5D%3C/text%3E%3Ctext x='50%25' y='56%25' fill='%236e7681' font-family='monospace' font-size='11' letter-spacing='1' text-anchor='middle'%3ECAMERA LINK OFFLINE // SENSOR CORRUPTED%3C/text%3E%3C/svg%3E";
+
+    // Cycle boot screen text messages
+    const bootTicker = [
+      "INITIALIZING SECURE HANDSHAKE...",
+      "QUERYING CITIZEN REGISTRY...",
+      "DECRYPTING BIOMETRIC DOSSIER...",
+      "CLEARANCE CONFIRMED // ACCESS GRANTED"
+    ];
+    let tickerIndex = 0;
+    const tickerInterval = setInterval(() => {
+      tickerIndex++;
+      const el = document.getElementById('boot-status');
+      if (el && bootTicker[tickerIndex]) {
+        el.innerText = bootTicker[tickerIndex];
+      }
+    }, 450);
+
+    function dismissBootScreen() {
+      clearInterval(tickerInterval);
+      const elapsed = Date.now() - pageStartTime;
+      const remainingTime = Math.max(0, MIN_BOOT_DURATION - elapsed);
+
+      setTimeout(() => {
+        const bootScreen = document.getElementById('boot-screen');
+        if (bootScreen) {
+          bootScreen.classList.add('fade-out');
+          setTimeout(() => bootScreen.remove(), 750);
+        }
+      }, remainingTime);
+    }
 
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
@@ -463,6 +621,7 @@
     }
 
     function renderError(title, subtitle) {
+      dismissBootScreen();
       document.getElementById('app').innerHTML = `
         <div class="system-header">
           <span>SYS.ERR // 404</span>
@@ -513,11 +672,7 @@
       const isBot = identity.toLowerCase().trim().includes('bot');
       const dateLabel = isBot ? 'PRODUCTION DATE' : 'DATE OF BIRTH';
 
-      // Hazard triggered when creativity >= 6 stars out of 10
-      const creativityMatch = creativity.match(/\d+/);
-      const creativityScore = creativityMatch ? parseInt(creativityMatch[0], 10) : 0;
-      //const isSubversive = creativityScore >= 6;
-      const isSubversive = subversiveHazard == 'TRUE';
+      const isSubversive = subversiveHazard.toUpperCase() === 'TRUE';
       const random = getRandomInt(1, 10);
 
       const appContainer = document.getElementById('app');
@@ -612,6 +767,9 @@
           <p>${areaConcern}</p>
         </div>
       `;
+
+      // Smoothly dismiss the pulsing boot screen now that content is loaded
+      dismissBootScreen();
     }
 
     async function loadCastData(retryCount = 0) {
@@ -666,7 +824,6 @@
               renderDossier(matched);
             } else {
               if (retryCount < 2) {
-                // Retry once in case stream completed partially
                 setTimeout(() => loadCastData(retryCount + 1), 750);
               } else {
                 console.warn("Parsed records from sheet:", records);
