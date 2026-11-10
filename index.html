@@ -563,7 +563,7 @@
     const MAX_STARS = 10;
 
     // Minimum display time for boot animation (in milliseconds)
-    const MIN_BOOT_DURATION = 1500;
+    const MIN_BOOT_DURATION = 2500;
     const pageStartTime = Date.now();
 
     // SVG placeholder if image link is blank, corrupted, or 404s
@@ -583,7 +583,7 @@
       if (el && bootTicker[tickerIndex]) {
         el.innerText = bootTicker[tickerIndex];
       }
-    }, 450);
+    }, 700);
 
     function dismissBootScreen() {
       clearInterval(tickerInterval);
