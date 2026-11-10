@@ -506,7 +506,7 @@
       const creativity = getVal(['creativity_individuality', 'creativity', 'individuality']);
       const notableTrait = getVal(['notable_trait', 'trait']);
       const areaConcern = getVal(['area_of_concern', 'concern']);
-      
+      const subversiveHazard = getVal(['subversive_hazard']);
       const imageUrl = getVal(['image', 'photo', 'picture', 'character_image', 'headshot']);
 
       // Conditional check: if identity contains "bot", display "PRODUCTION DATE", else "DATE OF BIRTH"
@@ -516,7 +516,8 @@
       // Hazard triggered when creativity >= 6 stars out of 10
       const creativityMatch = creativity.match(/\d+/);
       const creativityScore = creativityMatch ? parseInt(creativityMatch[0], 10) : 0;
-      const isSubversive = creativityScore >= 6;
+      //const isSubversive = creativityScore >= 6;
+      const isSubversive = subversiveHazard = true;
       const random = getRandomInt(1, 10);
 
       const appContainer = document.getElementById('app');
