@@ -517,7 +517,7 @@
       const creativityMatch = creativity.match(/\d+/);
       const creativityScore = creativityMatch ? parseInt(creativityMatch[0], 10) : 0;
       //const isSubversive = creativityScore >= 6;
-      const isSubversive = subversiveHazard = true;
+      const isSubversive = subversiveHazard == true;
       const random = getRandomInt(1, 10);
 
       const appContainer = document.getElementById('app');
