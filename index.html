@@ -335,7 +335,32 @@
       letter-spacing: 1.5px;
       color: #fff;
       text-shadow: 0 0 12px rgba(0, 255, 204, 0.35);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+    }
+
+    /* Wanted / Subversive Status Box directly under name */
+    .wanted-banner {
+      background: rgba(255, 0, 85, 0.16);
+      border: 1px solid var(--accent-danger);
+      border-left: 4px solid var(--accent-danger);
+      color: #ff94af;
+      padding: 9px 12px;
+      margin-bottom: 12px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 12px rgba(255, 0, 85, 0.2);
+      animation: alertPulse 2.2s infinite;
+    }
+
+    .wanted-banner span.warn-icon {
+      color: var(--accent-danger);
+      font-size: 1rem;
     }
 
     .meta-row {
@@ -700,6 +725,13 @@
         <div class="unit-meta">
           <div class="unit-identity">${identity !== '---' ? identity : 'DESIGNATION UNASSIGNED'}</div>
           
+          ${isSubversive ? `
+            <div class="wanted-banner">
+              <span class="warn-icon">⚠</span>
+              <span>Missing - Wanted under suspicion of Bohemianism</span>
+            </div>
+          ` : ''}
+
           <div class="meta-row">
             <div class="meta-item">
               <span>ENTITY ID NUMBER</span>
